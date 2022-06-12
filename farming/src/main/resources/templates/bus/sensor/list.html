@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>传感器管理</title>
+    <script type="text/javascript" src="/core/file.js"></script>
+    <script type="text/javascript" src="/js/bus/sensor/list.js"></script>
+</head>
+<body>
+<div id="app" class="box">
+    <avue-crud ref="crud"
+               v-model="form"
+               :page="page"
+               :data="tableData"
+               :table-loading="tableLoading"
+               :option="tableOption"
+               @on-load="getList"
+               @search-change="searchChange"
+               @refresh-change="refreshChange"
+               @size-change="sizeChange"
+               @current-change="currentChange"
+               @row-update="handleUpdate"
+               @row-save="handleSave"
+               @row-del="rowDel">
+    </avue-crud>
+
+</div>
+</body>
+<script>
+    var vm = new createVue({
+        el: '#app',
+        data: {
+            //访问接口前缀
+            url:"sensor",
+            //弹框显示判断
+            dialogVisible:false,
+        },
+        created() {
+
+        },
+
+        methods: {
+
+        }
+    })
+</script>
+</html>

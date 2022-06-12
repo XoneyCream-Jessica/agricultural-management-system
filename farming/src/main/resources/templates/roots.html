@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>产品溯源</title>
+    <script type="text/javascript" src="/core/file.js"></script>
+    <style>
+        body,html{
+            width: 100%;
+            height: 100%;
+        }
+        .box{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="box">
+    <div style="width: 100%;flex: 1" v-if="data!=null">
+        <tab_index :data="data" edit="false"></tab_index>
+    </div>
+    <div style="width: 100%;flex: 1;text-align: center;margin-top: 100px;" v-else>
+        <h3>暂无数据</h3>
+    </div>
+</div>
+<script>
+    var vm =  new Vue({
+        el: '#app',
+        components: {
+            'tab_index': httpVueLoader('/component/tab/index.vue'),
+        },
+        data: {
+            id:getQueryVariable("id"),
+            data:null,
+
+        },
+        created(){
+            if(this.id){
+                this.findProductExampleById();
+            }
+
+        },
+        methods: {
+
+            /**
+             * 通过id查询出编号
+             */
+            findProductExampleById(){
+                if(this.id=='' || this.id==null){
+                    this.data=null;
+                    return;
+                }
+                get("/product-example/get-by-id/"+this.id,res=>{
+                    this.data=res;
+                })
+            },
+
+        }
+    })
+</script>
+</body>
+</html>

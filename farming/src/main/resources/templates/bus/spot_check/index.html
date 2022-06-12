@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>产品抽查</title>
+    <script type="text/javascript" src="/core/file.js"></script>
+    <style>
+        body,html{
+            width: 100%;
+            height: 100%;
+        }
+        .box{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="box">
+    <div class="demo-input-suffix">
+        请输入产品批号：
+        <el-input v-model="id" clearable style="width: 300px"></el-input>
+        <el-button type="primary" icon="el-icon-search" @click="findProductExampleById()">查询</el-button>
+    </div>
+    <el-divider><i class="el-icon-warning"></i></el-divider>
+    <div style="width: 100%;flex: 1" v-if="data!=null">
+        <tab_index :data="data" edit="true"></tab_index>
+
+    </div>
+    <div style="width: 100%;flex: 1;text-align: center;margin-top: 100px;" v-else>
+        <h3>暂无数据</h3>
+    </div>
+</div>
+<script>
+    var vm =  new Vue({
+        el: '#app',
+        components: {
+            'tab_index': httpVueLoader('/component/tab/index.vue'),
+        },
+        data: {
+            id:"",
+            data:null,
+
+        },
+        methods: {
+            /**
+             * 通过id查询出编号
+             */
+            findProductExampleById(){
+                if(this.id=='' || this.id==null){
+                    this.data=null;
+                    return;
+                }
+                get("/product-example/get-by-id/"+this.id,res=>{
+                    this.data=res;
+                })
+            },
+
+        }
+    })
+</script>
+</body>
+</html>

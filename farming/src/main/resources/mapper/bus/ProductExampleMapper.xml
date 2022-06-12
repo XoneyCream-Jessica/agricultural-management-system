@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ams.module.bus.mapper.ProductExampleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ams.module.bus.entity.ProductExample">
+        <id column="id" property="id" />
+        <result column="product_id" property="productId" />
+        <result column="price" property="price" />
+        <result column="unit" property="unit" />
+        <result column="production_date" property="productionDate" />
+        <result column="inventory" property="inventory" />
+        <result column="note" property="note" />
+        <result column="create_date" property="createDate" />
+        <result column="create_user" property="createUser" />
+        <result column="update_date" property="updateDate" />
+        <result column="update_user" property="updateUser" />
+    </resultMap>
+    <select id="findPage" resultType="com.ams.module.bus.entity.ProductExample">
+        SELECT
+            *
+        FROM
+            (
+            SELECT
+                a.*,
+                b.type 'product_type',
+                b.name 'product_name',
+                c.NAME 'create_user_name',
+                c.`phone` 'create_user_phone'
+            FROM
+                product_example a
+                LEFT JOIN product b ON a.product_id = b.id
+           		LEFT JOIN sys_user c ON c.id = a.create_user
+        ) tab
+        ${ew.customSqlSegment}
+    </select>
+    <select id="findById" resultType="com.ams.module.bus.entity.ProductExample">
+        SELECT
+            *
+        FROM
+            (
+            SELECT
+                a.*,
+                b.type 'product_type',
+                b.name 'product_name',
+                c.NAME 'create_user_name',
+                c.`phone` 'create_user_phone'
+            FROM
+                product_example a
+                LEFT JOIN product b ON a.product_id = b.id
+           		LEFT JOIN sys_user c ON c.id = a.create_user
+        ) tab
+        where tab.id=#{id}
+    </select>
+
+    <select id="findTitlePriceList" resultType="com.ams.module.bus.entity.ProductExample">
+        SELECT
+            title,price
+        FROM
+            product_example
+    </select>
+
+    <select id="getProductIdByPeId" resultType="string">
+        SELECT
+            product_id
+        FROM
+            product_example
+        WHERE id=#{peId}
+    </select>
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ams.module.sys.mapper.SysUserMapper">
+
+
+    <select id="findPage" resultType="com.ams.module.sys.entity.SysUser">
+        select * from (
+            SELECT
+             u.*,
+                GROUP_CONCAT( r.`name` ) role_names
+            FROM
+                sys_user u
+                LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+                LEFT JOIN sys_role r ON r.id = ur.role_id
+                GROUP BY u.id
+        ) tab
+        ${ew.customSqlSegment}
+    </select>
+
+</mapper>

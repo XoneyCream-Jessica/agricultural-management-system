@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>菜单管理</title>
+    <script type="text/javascript" src="/core/file.js"></script>
+    <script type="text/javascript" src="/js/sys/dict/list.js"></script>
+</head>
+<body>
+<div id="app" class="box">
+    <avue-crud ref="crud"
+               v-model="form"
+               :page="page"
+               :data="tableData"
+               :table-loading="tableLoading"
+               :option="tableOption"
+               @on-load="getList"
+               @search-change="searchChange"
+               @refresh-change="refreshChange"
+               @size-change="sizeChange"
+               @current-change="currentChange"
+               @row-update="handleUpdate"
+               @row-save="handleSave"
+               @row-del="rowDel">
+        <template slot="menu" slot-scope="scope">
+            <el-button :size="scope.size" icon="el-icon-s-tools" @click="openDia(scope.row)" type="text">字典项</el-button>
+        </template>
+    </avue-crud>
+    <el-dialog
+            title="设置字典项"
+            :visible.sync="dialogVisible"
+            :close-on-click-modal="false"
+            width="50%">
+        <el-button type="primary" size="small" icon="el-icon-plus" @click="openItemDia({})">新增</el-button>
+        <el-table
+                :data="itemData"
+                height="400px"
+                style="width: 100%">
+            <el-table-column
+                    prop="label"
+                    label="字典名"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="val"
+                    label="字典值"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="desc"
+                    label="描述">
+            </el-table-column>
+            <el-table-column
+                    fixed="right"
+                    label="操作"
+                    width="100">
+                <template slot-scope="scope">
+                    <el-button type="text" size="small" @click="openItemDia(scope.row)">编辑</el-button>
+                    <el-button type="text" size="small" @click="delItem(scope.row.id)">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-dialog>
+
+    <el-dialog
+            title="编辑字典项"
+            :visible.sync="dialogVisible2"
+            :close-on-click-modal="false"
+            width="50%">
+        <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+            <el-form-item label="字典名：" prop="label">
+                <el-input v-model="ruleForm.label"></el-input>
+            </el-form-item>
+            <el-form-item label="字典值：" prop="val">
+                <el-input v-model="ruleForm.val"></el-input>
+            </el-form-item>
+            <el-form-item label="排序：" prop="sort">
+                <el-input-number v-model="ruleForm.sort" :precision="0"></el-input-number>
+            </el-form-item>
+            <el-form-item label="描述：">
+                <el-input v-model="ruleForm.desc"></el-input>
+            </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+                    <el-button type="primary" @click="saveItem()">确 定</el-button>
+                </span>
+    </el-dialog>
+
+</div>
+</body>
+<script>
+    var vm = new createVue({
+        el: '#app',
+        data: {
+            //访问接口前缀
+            url: "sys-dict",
+            //弹框显示判断
+            dialogVisible: false,
+            //编辑字典项
+            dialogVisible2: false,
+            //字典项集合
+            itemData: [],
+            //提交变蛋
+            ruleForm: {
+                label: '',
+                val: '',
+                desc: '',
+                sort: '',
+            },
+            rules: {
+                label: [
+                    {required: true, message: '请输入', trigger: 'blur'},
+                ],
+                val: [
+                    {required: true, message: '请输入', trigger: 'blur'},
+                ],
+                sort: [
+                    {required: true, message: '请输入', trigger: 'blur'},
+                ],
+
+            }
+        },
+        created() {
+
+        },
+
+        methods: {
+
+            //删除字典项
+            delItem(id) {
+                this.$confirm('是否确认删除？', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    del("/sys-dict-item/delete-by-id/" + id, res => {
+                        this.$message.success('删除成功');
+                        this.getItem();
+                    })
+                })
+            },
+
+            saveItem() {
+                this.$refs.ruleForm.validate((valid) => {
+                    if (valid) {
+                        $.ajax({
+                            url: this.ruleForm.id==null || this.ruleForm==''?"/sys-dict-item/add":"/sys-dict-item/update",
+                            type: this.ruleForm.id==null || this.ruleForm==''?'post':"put",
+                            data: this.ruleForm,
+                            success: function (res) {
+                                if(res.code!=1){
+                                    vm.$message.error(res.msg);
+                                }else{
+                                    vm.getItem();
+                                    vm.dialogVisible2 = false;
+                                    vm.$message.success("操作成功！");
+                                }
+
+                            }
+                        })
+
+                    }
+                });
+            },
+
+            //打开字典项框
+            openItemDia(row) {
+                this.ruleForm = row;
+                this.ruleForm.dictId=this.obj.id;
+                this.dialogVisible2 = true;
+            },
+
+            //打开弹框
+            openDia(row) {
+                this.obj = row;
+                this.getItem()
+                this.dialogVisible = true;
+            },
+            //查询出当前弹窗的字典项
+            getItem() {
+                get("/sys-dict-item/findList", {
+                    "dictId": this.obj.id,
+                }, res => {
+                    this.itemData = res;
+                })
+            }
+        }
+    })
+</script>
+</html>

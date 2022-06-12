@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ams.module.bus.mapper.ProductMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ams.module.bus.entity.Product">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="type" property="type" />
+        <result column="total" property="total" />
+        <result column="shelf_life_num" property="shelfLifeNum" />
+        <result column="unit" property="unit" />
+        <result column="create_date" property="createDate" />
+        <result column="create_user" property="createUser" />
+        <result column="update_date" property="updateDate" />
+        <result column="update_user" property="updateUser" />
+        <result column="listener_id" property="listenerId" />
+    </resultMap>
+    <select id="findPage" resultType="com.ams.module.bus.entity.Product">
+        select * from (
+              SELECT
+                a.*,
+                b.NAME 'create_user_name',
+                b.phone 'create_user_phone'
+            FROM
+            product a
+            LEFT JOIN sys_user b ON a.create_user = b.id
+        )tab
+        ${ew.customSqlSegment}
+    </select>
+    <select id="findById" resultType="com.ams.module.bus.entity.Product">
+        SELECT
+            a.*,
+            b.NAME 'create_user_name',
+            b.phone 'create_user_phone'
+        FROM
+            product a
+            LEFT JOIN sys_user b ON a.create_user = b.id
+        where a.id=#{id}
+    </select>
+
+    <select id="findProcList" resultType="com.ams.module.bus.entity.Product">
+        SELECT
+            id,name
+        FROM product
+        where del_flag = 0
+    </select>
+
+</mapper>

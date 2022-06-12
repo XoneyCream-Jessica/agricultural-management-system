@@ -1,0 +1,56 @@
+@startuml
+[*] --> 事件运行阶段
+
+state 事件运行阶段 {
+
+    Environment:generateData()
+    Sensor:onEvent()
+    Sensor --> Environment : 注册事件
+    Environment --> Sensor : 推送事件
+
+    Listener:ListenerBand(监听阈值)
+
+
+    Listener --> Sensor : 注册事件
+    Sensor --> Listener : 推送事件
+
+    HandlerCenter:onEvent()
+    HandlerCenter:NotifyHandler（通知处理器）
+    HandlerCenter:PestKillerHandler（害虫处理器）
+    HandlerCenter:HumitureHandler(湿度处理器)
+    HandlerCenter:HumitureHandler(温度处理器)
+    HandlerCenter:PersistHandler（事件持久化处理器）
+
+    Listener --> HandlerCenter: 推送事件
+
+
+    ListenerRepository:createListener()
+    ListenerRepository:deleteListener()
+    ListenerRepository:recoverAllListener()
+
+
+    SensorRepository:createSensor()
+    SensorRepository:deleteSensor()
+    SensorRepository:updateSensor()
+    SensorRepository:recoverAllSensor()
+
+    EnvRepository:generateDefaultEnv()
+    EnvRepository:getEnvBySensorType()
+
+    GrowingEnvironmentService:saveGrowingSituation()
+
+    NotifyWebSocketServer : sendMessage()
+
+    HandlerCenter --> ListenerRepository : 获取listener信息
+    HandlerCenter --> SensorRepository : 获取传感器信息
+    HandlerCenter --> EnvRepository : 对环境做应急处理
+    HandlerCenter --> GrowingEnvironmentService : 保存农产品生长信息
+    HandlerCenter --> NotifyWebSocketServer : 发送websocket推送信息
+
+    EnvRepository --> Environment:管理所有环境
+    SensorRepository --> Sensor:管理所有传感器
+    ListenerRepository --> Listener:管理所有Listener
+    HandlerCenter --> HandlerCenter:应急处理事件反馈
+
+}
+@enduml

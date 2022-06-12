@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>角色管理</title>
+    <script type="text/javascript" src="/core/file.js"></script>
+    <script type="text/javascript" src="/js/sys/role/list.js"></script>
+</head>
+<body>
+<div id="app">
+    <avue-crud ref="role"
+               v-model="form"
+               :page="page"
+               :data="tableData"
+               :table-loading="tableLoading"
+               :option="tableOption"
+               @on-load="getList"
+               @search-change="searchChange"
+               @refresh-change="refreshChange"
+               @size-change="sizeChange"
+               @current-change="currentChange"
+               @row-update="handleUpdate"
+               @row-save="handleSave"
+               @row-del="rowDel">
+        <template slot="menu" slot-scope="scope">
+            <el-button :size="scope.size" @click="openMenu(scope.row)" type="text">设置菜单</el-button>
+        </template>
+    </avue-crud>
+    <el-dialog
+            title="菜单"
+            :visible.sync="dialogVisible"
+
+            width="30%">
+        <div style="height: 400px;overflow:auto">
+            <el-tree
+                    check-strictly
+                    v-if="dialogVisible"
+                    ref="tree"
+                    :data="menuList"
+                    default-expand-all
+                    @check-change="checkChange"
+                    :props="defaultProps"
+                    class="filter-tree"
+                    node-key="id"
+                    highlight-current
+                    show-checkbox>
+            </el-tree>
+        </div>
+        <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="setMenuByRole">确 定</el-button>
+      </span>
+    </el-dialog>
+</div>
+</body>
+<script>
+    var vm = new createVue({
+        el: '#app',
+        data: {
+            //菜单集合
+            menuList: [],
+            checked: [],     //选中
+            defaultProps: {
+                children: 'children',
+                label: 'name'
+            },
+            dialogVisible: false,
+            url:"sys-role",
+        },
+        created() {
+        },
+        methods: {
+            checkChange(node, val) {
+                if (val) {
+                    this.setParent(node);
+                } else {
+                    this.setChildren(node.children,val);
+                }
+            },
+            //设置子集状态
+            setChildren(nodes, val) {
+                nodes.map(x => {
+                    if (x.children != null && x.children.length > 0) {
+                        this.setChildren(x.children);
+                    }
+                    //设置值
+                    this.$refs.tree.setChecked(x.id, val);
+                })
+            },
+            //设置父级选中
+            setParent(node) {
+                //获取父节点
+                let pNode = this.$refs.tree.getNode(node.pid);
+                //递归
+                if (pNode) {
+                    this.setParent(pNode.data);
+                }
+                //设置选中
+                this.$refs.tree.setChecked(node.id, true);
+            },
+            //保存菜单
+            setMenuByRole() {
+                let menuList = this.$refs.tree.getCheckedNodes(false, true)
+                postJson("/sys-role/setMenuByRole", {
+                    id: vm.obj.id,
+                    menus: menuList,
+                }, res => {
+                    this.$message.success("保存成功");
+                    this.dialogVisible = false;
+                })
+
+            },
+
+            openMenu(row) {
+                this.obj = row;
+                //查询出所有菜单
+                get("/sys-menu/findMenuTree", res => {
+                    this.menuList = res;
+                    this.tableLoading = false;
+                    this.dialogVisible = true;
+                    //查询出当前角色菜单
+                    get("/sys-menu/findMenuRole/" + vm.obj.id, x => {
+
+                        //设置选中
+                        for (let i = 0; i < x.length; i++) {
+                            //设置选中
+                            this.$refs.tree.setChecked(x[i].menuId, true);
+                        }
+                    })
+                })
+            },
+        }
+    })
+
+</script>
+</html>

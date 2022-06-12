@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>产品实例管理</title>
+    <script type="text/javascript" src="/core/file.js"></script>
+    <script type="text/javascript" src="/js/bus/productExample/list.js"></script>
+    <style>
+        .el-dropdown-link {
+            cursor: pointer;
+            color: #409EFF;
+        }
+        .el-icon-arrow-down {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="box">
+    <avue-crud ref="crud"
+               v-model="form"
+               :page="page"
+               :data="tableData"
+               :table-loading="tableLoading"
+               :option="tableOption"
+               @on-load="getList"
+               @search-change="searchChange"
+               @refresh-change="refreshChange"
+               @size-change="sizeChange"
+               @current-change="currentChange"
+               @row-update="handleUpdate"
+               @row-save="handleSave"
+               @row-del="rowDel">
+        <template slot="menu" slot-scope="scope">
+            <el-dropdown @command="handleClick" style="margin-left:10px">
+                <el-button icon="el-icon-s-tools" :size="scope.size" type="text">更多<i class="el-icon-arrow-down el-icon--right"></i></el-button>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item :command="{key:0,value:scope.row}"><i class="el-icon-upload2"></i>入库</el-dropdown-item>
+                    <el-dropdown-item :command="{key:1,value:scope.row}"><i class="el-icon-download"></i>出库</el-dropdown-item>
+                    <el-dropdown-item :command="{key:2,value:scope.row}"><i class="el-icon-picture"></i>生长照片</el-dropdown-item>
+                    <el-dropdown-item :command="{key:3,value:scope.row}"><i class="el-icon-edit"></i>生长环境记录</el-dropdown-item>
+                    <el-dropdown-item :command="{key:4,value:scope.row}"><i class="el-icon-edit"></i>营养成分检测</el-dropdown-item>
+                    <el-dropdown-item :command="{key:5,value:scope.row}"><i class="el-icon-s-grid"></i>二维码</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+        </template>
+    </avue-crud>
+    <el-dialog
+            title="图片列表"
+            :visible.sync="dialogVisible"
+            width="50%">
+        <product_example_img v-if="obj.id!=null" :key="dialogVisible" :peid="obj.id"></product_example_img>
+    </el-dialog>
+
+
+    <el-dialog
+            title="生长环境记录"
+            :visible.sync="dialogVisible2"
+            width="80%">
+        <growing_environment v-if="obj.id!=null" :key="dialogVisible2" :peid="obj.id" :productid="obj.productId"></growing_environment>
+    </el-dialog>
+
+    <el-dialog
+            title="营养成分检测"
+            :visible.sync="dialogVisible3"
+            width="80%">
+        <nutrition v-if="obj.id!=null" :key="dialogVisible3" :peid="obj.id"></nutrition>
+    </el-dialog>
+    <qr_code :peid="obj.id" ref="qr_code" ></qr_code>
+
+</div>
+</body>
+<script>
+    var vm = new createVue({
+        el: '#app',
+        data: {
+            key:0,
+            //访问接口前缀
+            url: "product-example",
+            //图片列表弹框
+            dialogVisible: false,
+            //生长环境记录弹框
+            dialogVisible2: false,
+            //营养成分检测弹框
+            dialogVisible3: false,
+
+        },
+        components: {
+            'product_example_img': httpVueLoader('/component/product_example_img.vue'),
+            'growing_environment': httpVueLoader('/component/growing_environment.vue'),
+            'nutrition': httpVueLoader('/component/nutrition.vue'),
+            'qr_code': httpVueLoader('/component/qr_code.vue'),
+        },
+        created() {
+
+        },
+
+        methods: {
+            putInventory(row, pd) {
+                this.$prompt('请输入入库数量', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    inputPattern: /^[0-9]*[1-9][0-9]*$/,
+                    inputErrorMessage: '格式不正确'
+                }).then(({value}) => {
+                    put("/" + this.url + "/putInventory", {
+                        id: row.id,
+                        inventory: pd ? value : -value,
+                    }, res => {
+                        mes("操作成功！");
+                        this.getList();
+                    })
+
+
+                })
+            },
+
+            handleClick(data){
+                switch (data.key) {
+                    case 0:
+                        this.putInventory(data.value,true)
+                        break;
+                    case 1:
+                        this.putInventory(data.value,false)
+                        break;
+                    case 2:
+                        this.obj=data.value;
+                        this.dialogVisible=true
+                        break;
+                    case 3:
+                        this.obj=data.value;
+                        this.dialogVisible2=true
+                        break;
+                    case 4:
+                        this.obj=data.value;
+                        this.dialogVisible3=true
+                        break;
+                    case 5:
+                        this.obj=data.value;
+                        console.log(this.$refs.qr_code)
+                        this.$refs.qr_code.dialogVisible=true;
+                        break;
+                }
+            }
+        }
+    })
+</script>
+</html>

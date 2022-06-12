@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>echarts调试</title>
+    <script src="/lib/echarts/echarts.min.js"></script>
+</head>
+<body style="display:flex;">
+
+<div id="#mainDiv" style="width: 50%;height:400px;margin-top: 0;">
+    <div id="app" style="margin-left: 20px;">
+        <el-row>
+            <el-col :span="24">
+                <el-select v-model="id" placeholder="请选择产品"
+                @change="gethumidity()">
+                    <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-col>
+<!--            <el-col :span="6">-->
+<!--                <el-button type="primary" icon="el-icon-search" @click="gethumidity()">查询</el-button>-->
+<!--            </el-col>-->
+        </el-row>
+    </div>
+    <div id="main1" style="width: 90%;height:400px;margin-top: 38px;padding-left: 15px;padding-right: 15px"></div>
+</div>
+
+<div id="main2" style="width: 50%;height:400px;margin-top: 6%;padding-right: 15px"></div>
+<script type="text/javascript" src="/core/file.js"></script>
+<script>
+    let vm = new Vue({
+        el: '#app',
+        data: {
+            id: '',
+            options: []
+        },
+        mounted() {
+            this.findProcList();
+        },
+        methods: {
+            findProcList(){
+                get("/product/findProcList",res=> {
+                    res.forEach(element=> {
+                        this.options.push({label: element.name, value:element.id })
+                    })
+                })
+            },
+            gethumidity(){
+                if(this.id == ''){
+                    return;
+                }
+                let createDate = [];
+                let temperature = [];
+                let humidity = [];
+                get("/growing-environment/findHumitureListByProcId/"+this.id,res=>{
+                    for(let i=0;i<res.length;i++){
+                        if(res[i].temperature != 0 && res[i].humidity != 0) {
+                            createDate.push(res[i].createDate);
+                            temperature.push(res[i].temperature);
+                            humidity.push(res[i].humidity);
+                        }
+                    }
+                    var myChart1 = echarts.init(document.getElementById('main1'));
+                    option1 = {
+                        title : {
+                            text: '产品温湿度变化图'
+                        },
+                        tooltip : {
+                            trigger: 'axis'
+                        },
+                        legend: {
+                            data:['温度','湿度']
+                        },
+                        toolbox: {
+                            show : true,
+                            feature : {
+                                mark : {show: true},
+                                magicType : {show: true, type: ['line', 'bar']},
+                                saveAsImage : {show: true}
+                            }
+                        },
+                        xAxis : [
+                            {
+                                type : 'category',
+                                data : createDate,
+                                axisLabel: {
+                                    //x轴文字的配置
+                                    show: false,
+                                    interval: 0,//使x轴文字显示全
+                                }
+                            }
+                        ],
+                        yAxis : [
+                            {
+                                type : 'value'
+                            }
+                        ],
+                        series : [
+                            {
+                                name:'温度',
+                                type:'line',
+                                data:temperature,
+                                connectNulls: true
+                            },
+                            {
+                                name:'湿度',
+                                type:'line',
+                                data:humidity,
+                                connectNulls: true
+                            }
+                        ]
+                    };
+                    // 使用刚指定的配置项和数据显示图表。
+                    myChart1.setOption(option1);
+                })
+            }
+
+        }
+    })
+
+    //每隔3s请求一次
+    setInterval(vm.gethumidity,3000)
+
+    let pTitle = []
+    let waterAmount = []
+    let illuminationTime = []
+    let fertilizationAmount = []
+    get("/growing-environment/findProcGrowEnvList",res=>{
+        for(let i=0;i<res.length;i++){
+            pTitle.push(res[i].title);
+            waterAmount.push(res[i].waterAmount);
+            illuminationTime.push(res[i].illuminationTime);
+            fertilizationAmount.push(res[i].fertilizationAmount);
+        }
+        console.log(res);
+        var myChart2 = echarts.init(document.getElementById('main2'));
+        option2 = {
+            title : {
+                text: '产品生长环境指标统计图',
+            },
+            tooltip : {
+                trigger: 'axis'
+            },
+            legend: {
+                data:['用水量','光照时长','施肥量']
+            },
+            toolbox: {
+                show : true,
+                feature : {
+                    mark : {show: true},
+                    magicType : {show: true, type: ['line', 'bar']},
+                    saveAsImage : {show: true}
+                }
+            },
+            calculable : true,
+            xAxis : [
+                {
+                    type : 'category',
+                    axisLabel: {
+                        //x轴文字的配置
+                        show: true,
+                        interval: 0,//使x轴文字显示全
+                    },
+                    data : pTitle
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value'
+                }
+            ],
+            series : [
+                {
+                    name:'用水量',
+                    type:'bar',
+                    data:waterAmount
+                },
+                {
+                    name:'光照时长',
+                    type:'bar',
+                    data:illuminationTime
+                },
+                {
+                    name:'施肥量',
+                    type:'bar',
+                    data:fertilizationAmount
+                }
+            ]
+        };
+        // 使用刚指定的配置项和数据显示图表。
+        myChart2.setOption(option2);
+    })
+</script>
+</body>
+</html>

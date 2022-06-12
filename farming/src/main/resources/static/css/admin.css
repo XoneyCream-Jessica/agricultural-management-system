@@ -1,0 +1,131 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+}
+
+#app {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+
+.left {
+    width: 230px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.left_head {
+    width: 100%;
+    height: 45px;
+    text-align: center;
+    line-height: 45px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background: #367fa9;
+    z-index: 99;
+}
+
+.left_main {
+    width: 100%;
+    flex: 1;
+    background: #334157;
+}
+
+.right {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.right_head {
+    width: 100%;
+    height: 45px;
+    background: #3c8dbc;
+    display: flex;
+
+}
+
+.right_main {
+    width: 100%;
+    flex: 1;
+    background: white;
+}
+
+
+.el-tree {
+    position: relative;
+    cursor: default;
+    background: #334157;
+    color: white;
+    font-size: 20px;
+}
+.el-tree-node__label{
+    font-size: 17px;
+    font-weight: bold;
+    padding:5px;
+}
+.el-tree-node__content:hover {
+    background: white;
+    color: black;
+}
+
+
+.el-tree-node:focus > .el-tree-node__content {
+    background: white;
+    color: black;
+}
+.el-tabs{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.el-tabs__content{
+    width: 100%;
+    flex: 1;
+}
+
+.el-notification {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    width: 330px;
+    height: 100px;
+    padding: 14px 26px 14px 13px;
+    border-radius: 8px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 1px solid #EBEEF5;
+    position: fixed;
+    background-color: #FFF;
+    -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
+    -webkit-transition: opacity .3s, left .3s, right .3s, top .4s, bottom .3s, -webkit-transform .3s;
+    transition: opacity .3s, left .3s, right .3s, top .4s, bottom .3s, -webkit-transform .3s;
+    transition: opacity .3s, transform .3s, left .3s, right .3s, top .4s, bottom .3s;
+    transition: opacity .3s, transform .3s, left .3s, right .3s, top .4s, bottom .3s, -webkit-transform .3s;
+    overflow: hidden
+}
+
+.el-notification__icon {
+    height: 2px;
+    width: 24px;
+    font-size: 24px
+}
+
+.el-notification__group {
+    margin-left: 30px;
+    margin-right: 8px;
+}

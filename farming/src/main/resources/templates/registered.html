@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <script type="text/javascript" src="/core/file.js"></script>
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+<div id="app" >
+    <div style="height: 100px"></div>
+    <el-card class="box-card" style="width: 500px;padding:20px;margin: 0 auto">
+        <div class="box_top">
+            <h1>农产品生产管理系统</h1>
+        </div>
+        <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px">
+            <el-form-item label="帐号：" prop="username">
+                <el-input onkeydown="if(event.keyCode==13) {$('#loginBtn').click();return false;}" v-model="ruleForm.username"></el-input>
+            </el-form-item>
+            <el-form-item label="密码：" prop="password">
+                <el-input type="password" onkeydown="if(event.keyCode==13) {$('#loginBtn').click();return false;}" v-model="ruleForm.password"></el-input>
+            </el-form-item>
+            <el-form-item label="确认密码：" prop="confirmPassword">
+                <el-input type="password" onkeydown="if(event.keyCode==13) {$('#loginBtn').click();return false;}" v-model="ruleForm.confirmPassword"></el-input>
+            </el-form-item>
+        </el-form>
+        <div style="width: 100%;text-align: center">
+            <el-button type="primary" id="loginBtn" @click="registered()">注册</el-button>
+        </div>
+    </el-card>
+</div>
+</body>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            ruleForm: {
+                username: '',
+                password: '',
+                confirmPassword: '',
+            },
+            rules: {
+                username: [
+                    {required: true, message: '请输入帐号', trigger: 'blur'},
+                ],
+                password: [
+                    {required: true, message: '请输入密码', trigger: 'blur'},
+                ],
+
+            },
+
+
+        },
+        methods: {
+
+            //注册
+            registered() {
+                this.$refs.ruleForm.validate((valid) => {
+                    if (valid) {
+                        $.ajax({
+                            url: "/sys-user/registered",
+                            type: "post",
+                            data: this.ruleForm,
+                            success: function (res) {
+                                if(res.code!=1){
+                                    vm.$message.error(res.msg);
+                                    vm.getCode()
+                                }else{
+                                    mes("注册成功");
+                                }
+
+                            }
+                        })
+
+                    }
+                });
+
+            }
+        }
+    })
+
+    window.vue = vm;
+</script>
+
+</html>

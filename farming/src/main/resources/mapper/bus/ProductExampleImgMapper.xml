@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ams.module.bus.mapper.ProductExampleImgMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ams.module.bus.entity.ProductExampleImg">
+        <id column="id" property="id" />
+        <result column="pe_id" property="peId" />
+        <result column="path" property="path" />
+    </resultMap>
+    <select id="findList" resultType="com.ams.module.bus.entity.ProductExampleImg">
+            SELECT
+                    *
+                FROM
+                    (
+                    SELECT
+                        a.*,
+                        b.`name` 'create_user_name',
+                        b.`phone` 'create_user_phone'
+                    FROM
+                        product_example_img a
+                    LEFT JOIN sys_user b ON a.create_user = b.id
+            ) tab
+            ${ew.customSqlSegment}
+
+    </select>
+
+</mapper>

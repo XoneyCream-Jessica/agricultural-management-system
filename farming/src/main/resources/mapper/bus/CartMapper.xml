@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ams.module.bus.mapper.CartMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ams.module.bus.entity.Cart">
+        <id column="id" property="id" />
+        <result column="pe_id" property="peId" />
+        <result column="number" property="number" />
+        <result column="create_date" property="createDate" />
+        <result column="create_user" property="createUser" />
+        <result column="update_date" property="updateDate" />
+        <result column="update_user" property="updateUser" />
+    </resultMap>
+    <select id="findList" resultType="com.ams.module.bus.vo.CartVo">
+        select * from (
+             select
+                b.id 'example_id',
+                b.`title` 'title',
+                c.id 'product_id',
+                c.img 'product_img',
+                c.`name` 'product_name',
+                c.shelf_life_num 'shelf_life_num',
+                (select label from sys_dict_item where dict_id=(select id from sys_dict where  dict_code='shelf_life_unit') and val=c.unit) 'shelf_life_unit',
+                b.price 'price',
+                (select label from sys_dict_item where dict_id=(select id from sys_dict where  dict_code='price_unit') and val=b.unit) 'priceUnit',
+                a.*
+                from  cart a
+                left join product_example b on a.pe_id=b.id
+                left join product c on b.product_id=c.id
+        )tab
+       ${ew.customSqlSegment}
+    </select>
+
+</mapper>

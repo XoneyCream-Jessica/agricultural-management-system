@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>菜单管理</title>
+        <script type="text/javascript" src="/core/file.js"></script>
+        <script type="text/javascript" src="/js/sys/menu/list.js"></script>
+    </head>
+    <body>
+        <div id="app" class="box">
+            <avue-crud ref="crud"
+                       v-model="form"
+                       :page="page"
+                       :before-open="beforeOpen"
+                       :data="tableData"
+                       :table-loading="tableLoading"
+                       :option="tableOption"
+                       @on-load="getList"
+                       @search-change="searchChange"
+                       @refresh-change="refreshChange"
+                       @size-change="sizeChange"
+                       @current-change="currentChange"
+                       @row-update="handleUpdate"
+                       @row-save="handleSave"
+                       @row-del="rowDel">
+                <template slot="menu" slot-scope="scope">
+                    <el-button v-if="buttonPermissionsCheck('SYS_MENU_ADD')" :size="scope.size" @click="handleAdd(scope.row)" type="text">
+                        添加
+                    </el-button>
+                </template>
+            </avue-crud>
+        </div>
+    </body>
+    <script>
+        var vm =createVue({
+            el: '#app',
+            data: {
+                url:'sys-menu',
+                page: {
+                    sortdatafield: "sort",  // 排序字段名
+                    sortorder: "asc"  // 排序方式 asc/desc
+                }
+            },
+            created: function () {
+                var vm = this;
+            },
+
+            methods: {
+                /**
+                 * 自定义新增
+                 */
+                handleAdd(row) {
+                    this.obj = row;
+                    this.$refs.crud.rowAdd();
+                },
+
+
+                beforeOpen(done, type) {
+                    setTimeout(() => {
+                        this.form.pid = this.obj.id
+                        this.obj = {};
+                    }, 0)
+                    done();
+                },
+
+
+                /**
+                 * 新增保存
+                 * @param row 行数据
+                 * @param done 完成回调
+                 * @param loading 加载回调
+                 */
+                handleSave: function (row, done, loading) {
+                    if(row.pid=='' || row.pid==null){
+                        row.pid=0;
+                    }
+                    post("/sys-menu/add", row, res => {
+                        this.$message.success('新增成功');
+                        this.getList();
+                        done();
+                    })
+                    loading();
+                },
+
+
+                /**
+                 * 获取列表数据
+                 * @param page 分页参数
+                 * @param params 查询条件
+                 */
+                getList(page, params) {
+                    this.tableLoading = true;
+                    let query = Object.assign({}, this.searchForm, this.page);
+                    get("/sys-menu/findMenuTree", query, res => {
+                        this.tableData = res;
+                        this.tableLoading = false;
+                    })
+                },
+
+            }
+        })
+
+
+    </script>
+</html>

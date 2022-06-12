@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>农产品生产管理系统</title>
+    <script type="text/javascript" src="/core/file.js"></script>
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+<div id="app">
+    <div class="top">
+        <el-menu
+                :default-active="activeIndex"
+                class="el-menu-demo"
+                mode="horizontal"
+                @select="handleSelect"
+                background-color="#545c64"
+                text-color="#fff"
+                active-text-color="#ffd04b">
+            <el-dropdown class="menu_item_me" @command="handleCommand" >
+                      <span class="el-dropdown-link" style="color: white">
+                             {{userInfo.name}}
+                          <i class="el-icon-arrow-down el-icon--right"></i>
+                      </span>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="userInfo">个人信息</el-dropdown-item>
+                    <el-dropdown-item command="updatePassword">修改密码</el-dropdown-item>
+                    <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+            <div class="menu_item_me" @click="dialogVisible=true">购物车</div>
+            <el-menu-item index="2">订单管理</el-menu-item>
+            <el-menu-item index="1">产品展示</el-menu-item>
+            <el-menu-item index="0">溯源查询</el-menu-item>
+        </el-menu>
+    </div>
+    <div class="content" >
+        <div v-if="activeIndex==0" style="width: 100%;height: 100%;display: flex;flex-direction: column ">
+            <div class="demo-input-suffix" >
+                请输入产品批号：
+                <el-input v-model="id" clearable style="width: 300px"></el-input>
+                <el-button type="primary" icon="el-icon-search" @click="findProductExampleById()">查询</el-button>
+            </div>
+            <el-divider><i class="el-icon-warning"></i></el-divider>
+            <div style="width: 100%;flex: 1" v-if="data!=null">
+                <tab_index :data="data" edit="false"></tab_index>
+
+            </div>
+            <div style="width: 100%;flex: 1;text-align: center;margin-top: 100px;" v-else>
+                <h3>暂无数据</h3>
+            </div>
+        </div>
+        <product_view v-if="activeIndex==1"></product_view>
+        <order_form v-if="activeIndex==2"></order_form>
+    </div>
+    <el-dialog
+            title="购物车"
+            :visible.sync="dialogVisible"
+            width="80%">
+        <div style="height: 600px;width: 100%">
+            <cart ref="cart" v-if="dialogVisible"></cart>
+        </div>
+      </span>
+    </el-dialog>
+    <user_info ref="user_info"></user_info>
+    <update_password ref="update_password"></update_password>
+</div>
+</body>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            id:"",      //产品批号
+            data:null,
+            //购物车弹框
+            dialogVisible:false,
+            //用户信息
+            userInfo: getSession("userInfo"),
+            activeIndex: '1',
+        },
+        components: {
+            'product_view': httpVueLoader('/component/sy/product_view.vue'),
+            'order_form': httpVueLoader('/component/order/order_form.vue'),
+            'cart': httpVueLoader('/component/sy/cart.vue'),
+            'user_info': httpVueLoader('/component/user_info.vue'),
+            'update_password': httpVueLoader('/component/update_password.vue'),
+            'tab_index': httpVueLoader('/component/tab/index.vue'),
+        },
+
+        created() {
+
+        },
+        methods: {
+            /**
+             * 通过id查询出编号
+             */
+            findProductExampleById(){
+                if(this.id=='' || this.id==null){
+                    this.data=null;
+                    return;
+                }
+                get("/product-example/get-by-id/"+this.id,res=>{
+                    this.data=res;
+                })
+            },
+            handleSelect(key) {
+                if(key!='-1'){
+                    this.activeIndex=key;
+                }
+            },
+
+            //下拉菜单触发时间
+            handleCommand(command) {
+                switch (command) {
+                    case 'userInfo':
+                        this.$refs.user_info.dialogVisible=true;
+                        break
+                    case 'updatePassword':
+                        this.$refs.update_password.dialogVisible=true;
+                        break
+                    case 'logout':
+                        window.location.href = "/logout"
+                        break
+                }
+            },
+
+
+        }
+    })
+
+</script>
+</html>

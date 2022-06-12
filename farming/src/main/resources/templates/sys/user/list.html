@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>用户管理</title>
+        <script type="text/javascript" src="/core/file.js"></script>
+        <script type="text/javascript" src="/js/sys/user/list.js"></script>
+    </head>
+    <body>
+        <div id="app" class="box">
+            <avue-crud ref="crud"
+                       v-model="form"
+                       :page="page"
+                       :data="tableData"
+                       :table-loading="tableLoading"
+                       :option="tableOption"
+                       @on-load="getList"
+                       @search-change="searchChange"
+                       @refresh-change="refreshChange"
+                       @size-change="sizeChange"
+                       @current-change="currentChange"
+                       @row-update="handleUpdate"
+                       @row-save="handleSave"
+                       @row-del="rowDel">
+                <template slot="menu" slot-scope="scope">
+                    <el-button v-if="buttonPermissionsCheck('SYS_USER_SET_ROLE')"  :size="scope.size" icon="el-icon-s-tools" @click="setRoleOpen(scope.row)" type="text">设置角色</el-button>
+                    <el-button v-if="buttonPermissionsCheck('SYS_USER_RESET_PASSWORD')" :size="scope.size" icon="el-icon-refresh" @click="resetPassword(scope.row)" type="text">重置密码</el-button>
+                </template>
+            </avue-crud>
+
+            <el-dialog
+                    title="设置用户角色"
+                    :visible.sync="dialogVisible"
+                    :close-on-click-modal="false"
+                    width="25%">
+                <el-select style="width: 100%" v-model="rolesVal" multiple placeholder="请选择">
+                    <el-option
+                            v-for="item in roles"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item.id">
+                    </el-option>
+                </el-select>
+                <span slot="footer" class="dialog-footer">
+                    <el-button type="primary" @click="setRoles()">确 定</el-button>
+                </span>
+            </el-dialog>
+        </div>
+    </body>
+    <script>
+        var vm = new createVue({
+            el: '#app',
+            data: {
+                //访问接口前缀
+                url:"sys-user",
+                //弹框显示判断
+                dialogVisible:false,
+                //角色集合
+                roles:[],
+                //设置的角色集合
+                rolesVal:[],
+            },
+            created() {
+                this.init();
+            },
+
+            methods: {
+
+                //设置用户角色
+                setRoles(){
+                    postJson("/"+this.url+"/setRoles",{
+                        id:this.obj.id,
+                        roles:this.rolesVal,
+                    },res=>{
+                        this.dialogVisible=false;
+                        this.$message.success("操作成功！");
+                        this.searchChange();
+                    })
+                },
+
+                //打开设置角色弹框
+                setRoleOpen(row){
+                    this.obj=row;
+                    this.dialogVisible=true;
+                },
+
+                //重置密码
+                resetPassword(row){
+                    this.$confirm('是否确认重置密码？', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        post("/sys-user/resetPassword",{id:row.id},res=>{
+                            this.$message.success("操作成功！");
+                        })
+                    })
+                },
+                //初始化
+                init(){
+                    //获取所有角色
+                    get("/sys-role/findList",res=>{
+                        this.roles=res;
+                    })
+                },
+
+
+                /**
+                 * 修改保存
+                 * @param row 行数据
+                 * @param index 行索引
+                 * @param done 完成回调
+                 * @param loading 加载回调
+                 */
+                handleUpdate: function (row, index, done, loading) {
+                    put("/" + this.url + "/update", {
+                        id:row.id,
+                        username:row.username,
+                        name:row.name,
+                        phone:row.phone,
+                        sex:row.sex,
+                    }, res => {
+                        this.$message.success('修改成功');
+                        this.getList();
+                        done();
+                    })
+                    loading();
+                },
+            }
+        })
+    </script>
+</html>

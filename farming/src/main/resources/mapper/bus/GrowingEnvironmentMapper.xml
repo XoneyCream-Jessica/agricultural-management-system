@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ams.module.bus.mapper.GrowingEnvironmentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.ams.module.bus.entity.GrowingEnvironment">
+        <id column="id" property="id" />
+        <result column="product_id" property="productId" />
+        <result column="water_amount" property="waterAmount" />
+        <result column="fertilization_amount" property="fertilizationAmount" />
+        <result column="fertilization_date" property="fertilizationDate" />
+        <result column="is_weeding" property="isWeeding" />
+        <result column="is_pesticide" property="isPesticide" />
+        <result column="pest_name" property="pestName" />
+        <result column="pesticide_name" property="pesticideName" />
+        <result column="pesticide_amount" property="pesticideAmount" />
+        <result column="soil_conditions" property="soilConditions" />
+        <result column="water_quality" property="waterQuality" />
+        <result column="illumination_time" property="illuminationTime" />
+        <result column="create_date" property="createDate" />
+        <result column="create_user" property="createUser" />
+        <result column="update_date" property="updateDate" />
+        <result column="update_user" property="updateUser" />
+    </resultMap>
+    <select id="findList" resultType="com.ams.module.bus.entity.GrowingEnvironment">
+       SELECT
+            *
+        FROM
+            (
+            SELECT
+                a.*,
+                b.`name` 'create_user_name',
+                b.`phone` 'create_user_phone'
+            FROM
+                growing_environment a
+            LEFT JOIN sys_user b ON a.create_user = b.id
+        ) tab
+        ${ew.customSqlSegment}
+    </select>
+
+
+    <select id="findProcGrowEnvList" resultType="java.util.Map">
+        SELECT
+            b.name as title,
+            SUM(a.water_amount) waterAmount,
+            SUM(a.illumination_time) illuminationTime,
+            SUM(a.fertilization_amount) fertilizationAmount
+        FROM
+            growing_environment a
+        LEFT JOIN product b ON a.product_id = b.id
+        GROUP BY b.name
+    </select>
+
+    <select id="findLastGrowEnv" resultType="com.ams.module.bus.entity.GrowingEnvironment">
+        SELECT
+            *
+        FROM
+            growing_environment
+        ${ew.customSqlSegment}
+    </select>
+
+    <select id="findHumitureListByProcId" resultType="com.ams.module.bus.entity.GrowingEnvironment">
+        SELECT
+            create_date createDate,temperature,humidity
+        FROM
+            growing_environment
+        WHERE product_id=#{productId}
+        order by createDate
+        LIMIT 60
+    </select>
+</mapper>

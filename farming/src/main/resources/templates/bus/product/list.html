@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>产品管理</title>
+        <script type="text/javascript" src="/core/file.js"></script>
+        <script type="text/javascript" src="/js/bus/product/list.js"></script>
+    </head>
+    <body>
+        <div id="app" class="box">
+            <avue-crud ref="crud"
+                       v-model="form"
+                       :page="page"
+                       :data="tableData"
+                       :table-loading="tableLoading"
+                       :option="tableOption"
+                       @on-load="getList"
+                       @search-change="searchChange"
+                       @refresh-change="refreshChange"
+                       @size-change="sizeChange"
+                       @current-change="currentChange"
+                       @row-update="handleUpdate"
+                       @row-save="handleSave"
+                       @row-del="rowDel">
+                <template slot="menu" slot-scope="scope">
+                    <el-button :size="scope.size" icon="el-icon-s-tools" @click="setSensorWinOpen(scope.row)" type="text">设置传感器</el-button>
+                </template>
+            </avue-crud>
+<!--            <el-dialog-->
+<!--                    title="设置传感器"-->
+<!--                    :visible.sync="dialogVisible"-->
+<!--                    :close-on-click-modal="false"-->
+<!--                    height="50%"-->
+<!--                    width="35%">-->
+<!--                <el-select style="width: 100%" v-model="bindSensors" multiple placeholder="请选择">-->
+<!--                    <el-option-->
+<!--                            v-for="item,index in sensors"-->
+<!--                            :key="item.id + index"-->
+<!--                            :label="item.name"-->
+<!--                            :value="item.id">-->
+<!--                    </el-option>-->
+<!--                </el-select>-->
+<!--                <span slot="footer" class="dialog-footer">-->
+<!--                    <el-button type="primary" @click="bindSensor()">确 定</el-button>-->
+<!--                </span>-->
+<!--            </el-dialog>-->
+            <el-dialog
+                    title="设置传感器"
+                    :visible.sync="dialogVisible"
+                    width="70%">
+                <set_sensor :oid="obj.id" :key="obj.id" :listener-id="obj.listenerId"></set_sensor>
+            </el-dialog>
+        </div>
+    </body>
+    <script>
+        var vm = new createVue({
+            el: '#app',
+            components: {
+                'set_sensor': httpVueLoader('/component/set_sensor.vue'),
+            },
+            data: {
+                //访问接口前缀
+                url:"product",
+                //弹框显示判断
+                dialogVisible:false,
+                sensors:[],
+                bindSensors:[]
+            },
+            created() {
+                this.init();
+            },
+
+            methods: {
+                setSensorWinOpen(row){
+                    this.obj=row;
+                    this.dialogVisible=true;
+                    get("/" + this.url + "/findAllBindSensor/" + this.obj.listenerId,res=>{
+                        this.bindSensors = []
+                        for(var index in res){
+                            this.bindSensors.push(res[index].id)
+                        }
+                    })
+                },
+
+                bindSensor(){
+                    postJson("/"+this.url+"/bindSensor",{
+                        listenerId : this.obj.listenerId,
+                        sensorIds : this.bindSensors,
+                    },res=>{
+                        this.dialogVisible=false;
+                        this.$message.success("操作成功！");
+                    })
+                },
+
+                //初始化
+                init(){
+                    //获取所有传感器
+                    get("/sensor/findList",res=>{
+                        this.sensors = res;
+                    })
+                },
+            }
+        })
+    </script>
+</html>

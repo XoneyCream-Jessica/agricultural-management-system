@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>订单列表</title>
+        <script type="text/javascript" src="/core/file.js"></script>
+    </head>
+    <body>
+        <div id="app" class="box">
+            <order_form :is_me="false"></order_form>
+        </div>
+    </body>
+    <script>
+        var vm = new Vue({
+            el: '#app',
+            components: {
+                'order_form': httpVueLoader('/component/order/order_form.vue'),
+            },
+            data: {
+            },
+            created() {
+
+            },
+
+            methods: {
+
+            }
+        })
+    </script>
+</html>
